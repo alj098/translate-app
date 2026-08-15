@@ -39,8 +39,6 @@
     .status { text-align: center; font-size: 12px; color: #888; margin-top: 12px; min-height: 18px; }
     .status.error { color: #c5221f; }
     .status.success { color: #34a853; }
-    .fallback-box { margin-top: 12px; padding: 12px; background: #fff3e0; border-radius: 10px; font-size: 13px; color: #e65100; display: none; }
-    .fallback-box a { color: #1a73e8; text-decoration: none; font-weight: 600; }
     @media (min-width: 600px) { body { max-width: 480px; margin: 0 auto; } }
   </style>
 </head>
@@ -65,11 +63,6 @@
     <div class="copy-bar">
       <button class="copy-btn" id="copyBtn" onclick="copyResult()">复制结果</button>
     </div>
-    <div class="fallback-box" id="fallback">
-      在线翻译接口暂时不可用，建议：<br>
-      1. 检查网络连接<br>
-      2. 尝试 <a href="https://fanyi.baidu.com" target="_blank">百度翻译</a> 或 <a href="https://fanyi.youdao.com" target="_blank">有道翻译</a>
-    </div>
   </div>
 
   <button class="btn-primary" id="transBtn" onclick="translate()">翻译</button>
@@ -81,7 +74,6 @@
     const btn = document.getElementById('transBtn');
     const copyBtn = document.getElementById('copyBtn');
     const status = document.getElementById('status');
-    const fallback = document.getElementById('fallback');
 
     function setStatus(msg, type) {
       status.textContent = msg;
@@ -92,47 +84,7 @@
       input.value = '';
       output.textContent = '';
       setStatus('');
-      fallback.style.display = 'none';
       input.focus();
-    }
-
-    // 备用API列表，按优先级尝试
-    async function tryTranslate(text) {
-      // API 1: MyMemory（免费，有速率限制）
-      try {
-        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=zh|en`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-        const data = await res.json();
-        if (data.responseStatus === 200) {
-          return { text: data.responseData.translatedText, source: 'MyMemory' };
-        }
-      } catch (e) { console.log('MyMemory failed', e); }
-
-      // API 2: Google Translate 非官方（国内大概率不可用，作为备用）
-      try {
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=en&dt=t&q=${encodeURIComponent(text)}`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-        const data = await res.json();
-        const result = data[0].map(item => item[0]).join('');
-        return { text: result, source: 'Google' };
-      } catch (e) { console.log('Google failed', e); }
-
-      // API 3: LibreTranslate 公共实例（部分国内可访问）
-      try {
-        const url = 'https://libretranslate.de/translate';
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ q: text, source: 'zh', target: 'en', format: 'text' }),
-          signal: AbortSignal.timeout(8000)
-        });
-        const data = await res.json();
-        if (data.translatedText) {
-          return { text: data.translatedText, source: 'LibreTranslate' };
-        }
-      } catch (e) { console.log('LibreTranslate failed', e); }
-
-      throw new Error('所有翻译接口均不可用');
     }
 
     async function translate() {
@@ -142,16 +94,24 @@
       btn.disabled = true;
       btn.textContent = '翻译中...';
       setStatus('');
-      fallback.style.display = 'none';
 
       try {
-        const result = await tryTranslate(text);
-        output.textContent = result.text;
-        setStatus(`翻译完成 (${result.source})`, 'success');
+        const res = await fetch('https://api.translate.zvo.cn/translate.json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'from=chinese_simplified&to=english&text=' + encodeURIComponent(text)
+        });
+        const data = await res.json();
+        
+        if (data.result === 1 && data.text && data.text.length > 0) {
+          output.textContent = data.text[0];
+          setStatus('翻译成功', 'success');
+        } else {
+          throw new Error(data.info || '翻译失败');
+        }
       } catch (err) {
         output.textContent = '';
-        setStatus('翻译失败：网络或接口受限', 'error');
-        fallback.style.display = 'block';
+        setStatus('翻译失败：' + (err.message || '网络错误'), 'error');
       }
 
       btn.disabled = false;
@@ -166,10 +126,12 @@
         copyBtn.textContent = '已复制';
         copyBtn.classList.add('copied');
         setTimeout(() => { copyBtn.textContent = '复制结果'; copyBtn.classList.remove('copied'); }, 1500);
-      } catch (e) { setStatus('复制失败', 'error'); }
+      } catch (e) {
+        setStatus('复制失败', 'error');
+      }
     }
 
-    // 支持回车翻译（手机键盘上的"前往"/"搜索"键）
+    // 支持回车键翻译（手机键盘搜索/前往键）
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
