@@ -8,7 +8,7 @@
 - primary_skill: ida-reverse/SKILL.md
 - primary_id: R6
 - lead_role: lead
-- specialist_roles: []
+- specialist_roles: [cre]
 - hint: 反汇编 .elf 样本的 check_code 校验函数
 - preset: offline-sample
 
@@ -52,8 +52,8 @@
   - [x] auth.status = granted
   - [x] in_scope.assets non-empty OR offline sample path set
   - [x] network_profile.mode chosen
-  - [ ] out_of_scope reviewed
-  - [ ] roles assigned (see skills/ops/role-map.md)
+  - [x] out_of_scope reviewed
+  - [x] roles assigned (see skills/ops/role-map.md)
 
 ## ops_refs
 - skills/ops/scope-contract.md
