@@ -1,0 +1,53 @@
+$ objdump -d --disassemble=check_code sample
+
+/workspace/work/elf-demo-src/sample:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .plt.got:
+
+Disassembly of section .plt.sec:
+
+Disassembly of section .text:
+
+0000000000001189 <check_code>:
+    1189:	f3 0f 1e fa          	endbr64
+    118d:	53                   	push   %rbx
+    118e:	48 83 ec 10          	sub    $0x10,%rsp
+    1192:	48 89 fb             	mov    %rdi,%rbx
+    1195:	e8 e6 fe ff ff       	call   1080 <strlen@plt>
+    119a:	48 89 c2             	mov    %rax,%rdx
+    119d:	b8 00 00 00 00       	mov    $0x0,%eax
+    11a2:	48 83 fa 08          	cmp    $0x8,%rdx
+    11a6:	75 3f                	jne    11e7 <check_code+0x5e>
+    11a8:	b8 00 00 00 00       	mov    $0x0,%eax
+    11ad:	48 8d 0d 64 2e 00 00 	lea    0x2e64(%rip),%rcx        # 4018 <g_key>
+    11b4:	0f b6 14 01          	movzbl (%rcx,%rax,1),%edx
+    11b8:	32 14 03             	xor    (%rbx,%rax,1),%dl
+    11bb:	88 54 04 08          	mov    %dl,0x8(%rsp,%rax,1)
+    11bf:	48 83 c0 01          	add    $0x1,%rax
+    11c3:	48 83 f8 08          	cmp    $0x8,%rax
+    11c7:	75 eb                	jne    11b4 <check_code+0x2b>
+    11c9:	48 8d 7c 24 08       	lea    0x8(%rsp),%rdi
+    11ce:	ba 08 00 00 00       	mov    $0x8,%edx
+    11d3:	48 8d 35 36 2e 00 00 	lea    0x2e36(%rip),%rsi        # 4010 <g_target>
+    11da:	e8 b1 fe ff ff       	call   1090 <memcmp@plt>
+    11df:	85 c0                	test   %eax,%eax
+    11e1:	0f 94 c0             	sete   %al
+    11e4:	0f b6 c0             	movzbl %al,%eax
+    11e7:	48 83 c4 10          	add    $0x10,%rsp
+    11eb:	5b                   	pop    %rbx
+    11ec:	c3                   	ret
+
+Disassembly of section .fini:
+
+$ objdump -s -j .data sample
+
+/workspace/work/elf-demo-src/sample:     file format elf64-x86-64
+
+Contents of section .data:
+ 4000 00000000 00000000 08400000 00000000  .........@......
+ 4010 5e4513c6 cd6e2b15 13374299 ab0d5e71  ^E...n+..7B...^q

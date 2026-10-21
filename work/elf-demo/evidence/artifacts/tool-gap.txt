@@ -1,0 +1,10 @@
+$ grep -E "^\| (ida|ida64|ghidra|r2) " <skill>/skills/tool-index.md
+| r2 | radare2 | radare2 CLI analysis | no | — | — | — | GitHub/source preferred; apt if available |
+| ghidra | reverse-engineering | Ghidra reverse-engineering suite | no | — | — | — | GitHub release ZIP or Flatpak; Java required |
+| r2 | ✗ | ✗ | — | — | — | ✓ | github-release-zip |
+
+$ command -v objdump readelf strings gdb
+objdump  /usr/bin/objdump
+readelf  /usr/bin/readelf
+strings  /usr/bin/strings
+gdb      /usr/bin/gdb

@@ -1,0 +1,5 @@
+$ readelf -sW sample | grep -E "check_code|main|g_key|g_target"
+    22: 0000000000004018     8 OBJECT  GLOBAL DEFAULT   25 g_key
+    31: 0000000000004010     8 OBJECT  GLOBAL DEFAULT   25 g_target
+    35: 00000000000011ed    76 FUNC    GLOBAL DEFAULT   16 main
+    36: 0000000000001189   100 FUNC    GLOBAL DEFAULT   16 check_code

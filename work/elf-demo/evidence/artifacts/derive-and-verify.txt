@@ -1,0 +1,10 @@
+$ python3 tools/derive_code.py
+derived_code: MrQ_fcud
+
+$ ./sample MrQ_fcud
+OK
+exit=0
+
+$ ./sample WRONGxxx
+DENIED
+exit=0
